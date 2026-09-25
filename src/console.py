@@ -38,8 +38,8 @@ def setup(title, cols, rows):
     # note: largest consolas size that fits the screen (a character is ~half as wide as tall)
     screen_width = user32.GetSystemMetrics(0)
     screen_height = user32.GetSystemMetrics(1)
-    size_by_height = int(screen_height * 0.85 / rows)
-    size_by_width = int(screen_width * 0.9 / cols * 2)
+    size_by_height = int(screen_height * 0.65 / rows)
+    size_by_width = int(screen_width * 0.7 / cols * 2)
     size = min(size_by_height, size_by_width)
     size = max(8, size)
 
