@@ -15,6 +15,7 @@
     * An ASCII animation
     * Animation opens up in a separate, perfectly sized, rightly zoomed command prompt window
     * The chinese phrase "三人行" bounces around the box like the "DVD" animation
+        * The phrase is in a filled box and hollowed out to make it
 
 * **Culture perspective**
     * Chinese background
@@ -31,3 +32,6 @@
 * **Four visual craft choices**
     * DVD animation
         * Chinese proverb instead of DVD
+    * Border of the screen is constructed using the word "LIFE"
+    * The chinese characters are constructed using the word "ME"
+    * Chose to make an ASCII animation to convey my love for computer science
