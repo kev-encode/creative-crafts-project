@@ -16,8 +16,14 @@ FADE_STEPS = 24          # note: grayscale levels 232 to 255
 BORDER_WORD = "LIFE"
 FILL_WORD = "ME" # note: every pixel of the box is one "ME"
 BORDER_SHADE = 244
+TITLE_SHADE = 255
 FULL = 255
 DARK = 232
+
+# note: title sits in the middle of the bottom edge
+LABEL = " " + TITLE.upper() + " "
+LABEL_START = (COLS - len(LABEL)) // 2
+LABEL_END = LABEL_START + len(LABEL)
 
 def glyph(char):
     drawing = GLYPHS[char]
@@ -91,12 +97,8 @@ def border():
         cells[(i, left_col)] = letter
         cells[(i, right_col)] = letter
 
-    # note: title sits in the middle of the bottom edge
-    label = " " + TITLE.upper() + " "
-    start = (COLS - len(label)) // 2
-
-    for i in range(len(label)):
-        cells[(bottom_row, start + i)] = label[i]
+    for i in range(len(LABEL)):
+        cells[(bottom_row, LABEL_START + i)] = LABEL[i]
 
     return cells
 
@@ -107,6 +109,7 @@ PROVERB = block("必有我师")
 def render(block=None, pos=(0, 0), shade=FULL):
     border_colour = f"\x1b[38;5;{BORDER_SHADE}m"
     block_colour = f"\x1b[38;5;{shade}m"
+    title_colour = f"\x1b[38;5;{TITLE_SHADE}m"
     inner_width = COLS - 2
     block_x = pos[0]
     block_y = pos[1]
@@ -126,6 +129,10 @@ def render(block=None, pos=(0, 0), shade=FULL):
             edge = ""
 
             for j in range(COLS):
+                if i == ROWS - 1 and j == LABEL_START:
+                    edge += title_colour
+                if i == ROWS - 1 and j == LABEL_END:
+                    edge += border_colour
                 edge += BORDER[(i, j)]
 
             line = border_colour + edge
