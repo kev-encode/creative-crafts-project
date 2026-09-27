@@ -7,6 +7,7 @@ def setup(title, cols, rows):
 
     kernel32 = ctypes.windll.kernel32
     user32 = ctypes.windll.user32
+
     STD_OUTPUT_HANDLE = -11
     ENABLE_VT_SEQUENCES = 0x0004
     SWP_NOSIZE = 0x0001
@@ -19,17 +20,17 @@ def setup(title, cols, rows):
     kernel32.GetConsoleMode(handle, ctypes.byref(mode))
     kernel32.SetConsoleMode(handle, mode.value | ENABLE_VT_SEQUENCES)
 
-    class COORD(ctypes.Structure):
+    class Coord(ctypes.Structure):
         _fields_ = [
             ("X", ctypes.c_short),
             ("Y", ctypes.c_short),
         ]
 
-    class FONT(ctypes.Structure):
+    class Font(ctypes.Structure):
         _fields_ = [
             ("cbSize", ctypes.c_ulong),
             ("nFont", ctypes.c_ulong),
-            ("dwFontSize", COORD),
+            ("dwFontSize", Coord),
             ("FontFamily", ctypes.c_uint),
             ("FontWeight", ctypes.c_uint),
             ("FaceName", ctypes.c_wchar * 32),
@@ -43,10 +44,10 @@ def setup(title, cols, rows):
     size = min(size_by_height, size_by_width)
     size = max(8, size)
 
-    font = FONT()
-    font.cbSize = ctypes.sizeof(FONT)
+    font = Font()
+    font.cbSize = ctypes.sizeof(Font)
     font.nFont = 0
-    font.dwFontSize = COORD(0, size)
+    font.dwFontSize = Coord(0, size)
     font.FontFamily = 54
     font.FontWeight = 400
     font.FaceName = "Consolas"

@@ -1,7 +1,6 @@
 import random
 import sys
 import time
-
 from console import setup
 from glyphs import GLYPHS
 
@@ -25,16 +24,16 @@ LABEL = " " + TITLE.upper() + " "
 LABEL_START = (COLS - len(LABEL)) // 2
 LABEL_END = LABEL_START + len(LABEL)
 
-def glyph(char):
-    drawing = GLYPHS[char]
-    drawing = drawing.strip("\n")
-    rows = drawing.splitlines()
+def make_glyph(char):
+    glyph = GLYPHS[char]
+    glyph = glyph.strip("\n")
+    rows = glyph.splitlines()
     return rows
 
-def block(text):
+def make_block(text):
     glyphs = []
     for char in text:
-        glyphs.append(glyph(char))
+        glyphs.append(make_glyph(char))
 
     glyph_height = len(glyphs[0])
     block_height = glyph_height + 2
@@ -43,17 +42,17 @@ def block(text):
 
     # note: True = filled with "ME", False = hollow (part of a character)
     pixels = []
-    for i in range(block_height):
+    for r in range(block_height):
         row = [True]
         
-        for j in glyphs:
-            glyph_width = len(j[0])
+        for glyph in glyphs:
+            glyph_width = len(glyph[0])
 
-            if i == top_row or i == bottom_row:
-                for k in range(glyph_width):
+            if r == top_row or r == bottom_row:
+                for c in range(glyph_width):
                     row.append(True)
             else:
-                glyph_row = j[i - 1]
+                glyph_row = glyph[r - 1]
 
                 for mark in glyph_row:
                     is_filled = mark != "#"
@@ -66,10 +65,10 @@ def block(text):
     hollow = " " * len(FILL_WORD)
 
     lines = []
-    for row in pixels:
+    for r in pixels:
         line = ""
 
-        for is_filled in row:
+        for is_filled in r:
             if is_filled:
                 line += FILL_WORD
             else:
@@ -79,37 +78,37 @@ def block(text):
 
     return lines
 
-def border():
-    word_length = len(BORDER_WORD)
+def make_border():
+    word_len = len(BORDER_WORD)
     top_row = 0
     bottom_row = ROWS - 1
     left_col = 0
     right_col = COLS - 1
     cells = {}
 
-    for i in range(COLS):
-        letter = BORDER_WORD[i % word_length]
-        cells[(top_row, i)] = letter
-        cells[(bottom_row, i)] = letter
+    for c in range(COLS):
+        letter = BORDER_WORD[c % word_len]
+        cells[(top_row, c)] = letter
+        cells[(bottom_row, c)] = letter
 
-    for i in range(1, ROWS - 1):
-        letter = BORDER_WORD[i % word_length]
-        cells[(i, left_col)] = letter
-        cells[(i, right_col)] = letter
+    for r in range(1, ROWS - 1):
+        letter = BORDER_WORD[r % word_len]
+        cells[(r, left_col)] = letter
+        cells[(r, right_col)] = letter
 
     for i in range(len(LABEL)):
         cells[(bottom_row, LABEL_START + i)] = LABEL[i]
 
     return cells
 
-BORDER = border()
-BOUNCER = block("三人行")
-PROVERB = block("必有我师")
+BORDER = make_border()
+BOUNCER = make_block("三人行")
+PROVERB = make_block("必有我师")
 
 def render(block=None, pos=(0, 0), shade=FULL):
-    border_colour = f"\x1b[38;5;{BORDER_SHADE}m"
-    block_colour = f"\x1b[38;5;{shade}m"
-    title_colour = f"\x1b[38;5;{TITLE_SHADE}m"
+    border_color = f"\x1b[38;5;{BORDER_SHADE}m"
+    block_color = f"\x1b[38;5;{shade}m"
+    title_color = f"\x1b[38;5;{TITLE_SHADE}m"
     inner_width = COLS - 2
     block_x = pos[0]
     block_y = pos[1]
@@ -122,33 +121,36 @@ def render(block=None, pos=(0, 0), shade=FULL):
         block_height = 0
 
     lines = []
-    for i in range(ROWS):
-        is_top_or_bottom = i == 0 or i == ROWS - 1
+    for r in range(ROWS):
+        is_edge_row = (r == 0) or (r == ROWS - 1)
 
-        if is_top_or_bottom:
+        if is_edge_row:
             edge = ""
 
-            for j in range(COLS):
-                if i == ROWS - 1 and j == LABEL_START:
-                    edge += title_colour
-                if i == ROWS - 1 and j == LABEL_END:
-                    edge += border_colour
-                edge += BORDER[(i, j)]
+            for c in range(COLS):
+                if r == ROWS - 1 and c == LABEL_START:
+                    edge += title_color
 
-            line = border_colour + edge
+                if r == ROWS - 1 and c == LABEL_END:
+                    edge += border_color
+
+                edge += BORDER[(r, c)]
+
+            line = border_color + edge
+
         else:
-            block_row = i - 1 - block_y
-            block_on_this_row = block and 0 <= block_row < block_height
+            block_row = r - 1 - block_y
+            is_block_row = block and (0 <= block_row < block_height)
 
-            if block_on_this_row:
+            if is_block_row:
                 left_gap = " " * block_x
                 right_gap = " " * (inner_width - block_x - block_width)
-                inside = left_gap + block_colour + block[block_row] + right_gap
+                inside = left_gap + block_color + block[block_row] + right_gap
             else:
                 inside = " " * inner_width
 
-            left_edge = border_colour + BORDER[(i, 0)]
-            right_edge = border_colour + BORDER[(i, COLS - 1)]
+            left_edge = border_color + BORDER[(r, 0)]
+            right_edge = border_color + BORDER[(r, COLS - 1)]
             line = left_edge + inside + right_edge
 
         lines.append(line)
@@ -189,10 +191,10 @@ def plan():
         dy = start_dy
 
         # note: simulate this start and see when it first hits a corner
-        for step in range(1, max_steps + 1):
+        for i in range(1, max_steps + 1):
             x = x + dx
             y = y + dy
-            hit_side = x == 0 or x == max_x
+            hit_side = (x == 0) or (x == max_x)
             hit_top_or_bottom = y == 0 or y == max_y
 
             if hit_side:
@@ -202,8 +204,8 @@ def plan():
                 dy = -dy
 
             if hit_side and hit_top_or_bottom:
-                if step >= min_steps:
-                    return start_x, start_y, start_dx, start_dy, step
+                if i >= min_steps:
+                    return start_x, start_y, start_dx, start_dy, i
                 
                 break
 
@@ -213,7 +215,7 @@ def bounce():
     max_y = ROWS - 2 - len(BOUNCER)
     fade(BOUNCER, (x * 2, y), rising=True)
     
-    for _ in range(steps):
+    for i in range(steps):
         x = x + dx
         y = y + dy
 
@@ -229,7 +231,7 @@ def bounce():
     time.sleep(HOLD)
     fade(BOUNCER, (x * 2, y), rising=False)
 
-def proverb():
+def make_proverb():
     center_x = (COLS - 2 - len(PROVERB[0])) // 2
     center_y = (ROWS - 2 - len(PROVERB)) // 2
     pos = (center_x, center_y)
@@ -245,7 +247,7 @@ def main():
     try:
         while True:
             bounce()
-            proverb()
+            make_proverb()
     except KeyboardInterrupt:
         pass
 
