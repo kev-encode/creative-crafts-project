@@ -39,3 +39,7 @@ A personal, culturally representative ASCII animation.
     ```
 
 <br>
+
+---
+
+*Last updated: 10/2/2026*
